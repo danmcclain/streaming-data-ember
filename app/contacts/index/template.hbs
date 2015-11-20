@@ -2,6 +2,6 @@
 
 {{#each model as |contact|}}
   <div>
-    {{contact.firstName}}
+    {{link-to contact.firstName 'contacts.show' contact.id}}
   </div>
 {{/each}}

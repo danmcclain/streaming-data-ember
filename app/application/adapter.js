@@ -11,7 +11,6 @@ const {
 export default DS.Adapter.extend({
   defaultSerializer: '-json-api',
   phoenix: inject.service(),
-  channel: null,
 
   createRecord(store, type, snapshot) {
     var data = {};
@@ -19,16 +18,33 @@ export default DS.Adapter.extend({
 
     serializer.serializeIntoHash(data, type, snapshot, { includeId: true })
 
-    const channel = get(this, 'channel');
+    const phoenix = get(this, 'phoenix');
 
-    if (channel) {
+    return phoenix.channel('contacts:index').then((channel) => {
+      debugger
       return channel.push('create', data);
-    } else {
-    }
+    });
+  },
+
+  updateRecord(store, type, snapshot) {
+    var data = {};
+    var serializer = store.serializerFor(type.modelName);
+
+    serializer.serializeIntoHash(data, type, snapshot, { includeId: true })
+
+    const phoenix = get(this, 'phoenix');
+
+    return phoenix.channel('contacts:index').then((channel) => {
+      return channel.push('update', data);
+    });
   },
 
   findRecord(store, type, id, snapshot) {
-    debugger;
+    const phoenix = get(this, 'phoenix');
+
+    return phoenix.channel('contacts:index').then((channel) => {
+      return channel.push('find', id);
+    });
   },
 
   findAll(store, type, sinceToken) {
@@ -36,17 +52,8 @@ export default DS.Adapter.extend({
     var serializer = store.serializerFor(type.modelName);
     const phoenix = get(this, 'phoenix');
 
-    return phoenix.channel('contacts:index')
-      .then((channel) => {
-        channel.on('new_contact', (payload) => {
-          payload = serializer._normalizeResponse(null, null, payload);
-          store.push(payload);
-        });
-        return channel.join();
-      })
-      .then((channel) => {
-        set(adapter, 'channel', channel);
-        return channel.push('all')
-      });
+    return phoenix.channel('contacts:index').then((channel) => {
+      return channel.push('all');
+    });
   }
 });

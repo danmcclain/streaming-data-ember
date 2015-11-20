@@ -38,6 +38,7 @@ const ChannelProxy = Ember.Object.extend({
   },
 
   push(event, payload) {
+    console.log(payload);
     return new Promise((resolve, reject) => {
       get(this, 'channel').push(event, payload)
         .receive('ok', (payload) => {
@@ -51,6 +52,7 @@ const ChannelProxy = Ember.Object.extend({
 });
 
 export default Service.extend({
+  channels: {},
   socket: null,
   connect: on('init', function() {
     const socket = new Socket('/socket');
@@ -66,9 +68,13 @@ export default Service.extend({
   }),
 
   channel(channelName, options) {
-    return get(this, 'socket').then((socket) => {
-      const channel = socket.channel(channelName, options);
-      return new ChannelProxy(channel);
+    if (this.channels[channelName]) {
+      return this.channels[channelName];
+    }
+
+    return this.channels[channelName] = get(this, 'socket').then((socket) => {
+      let channel = socket.channel(channelName, options);
+      return new ChannelProxy(channel).join();
     });
   }
 });
