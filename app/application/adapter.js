@@ -3,6 +3,7 @@ import Ember from 'ember';
 
 const {
   RSVP,
+  String: { pluralize },
   get,
   inject,
   set
@@ -13,36 +14,38 @@ export default DS.Adapter.extend({
   phoenix: inject.service(),
 
   createRecord(store, type, snapshot) {
-    var data = {};
-    var serializer = store.serializerFor(type.modelName);
+    let data = {};
+    let channelName = pluralize(type.modelName);
+    let serializer = store.serializerFor(type.modelName);
 
     serializer.serializeIntoHash(data, type, snapshot, { includeId: true })
 
-    const phoenix = get(this, 'phoenix');
+    let phoenix = get(this, 'phoenix');
 
-    return phoenix.channel('contacts:index').then((channel) => {
-      debugger
+    return phoenix.channel(`${channelName}:index`).then((channel) => {
       return channel.push('create', data);
     });
   },
 
   updateRecord(store, type, snapshot) {
-    var data = {};
-    var serializer = store.serializerFor(type.modelName);
+    let data = {};
+    let channelName = pluralize(type.modelName);
+    let serializer = store.serializerFor(type.modelName);
 
     serializer.serializeIntoHash(data, type, snapshot, { includeId: true })
 
-    const phoenix = get(this, 'phoenix');
+    let phoenix = get(this, 'phoenix');
 
-    return phoenix.channel('contacts:index').then((channel) => {
+    return phoenix.channel(`${channelName}:index`).then((channel) => {
       return channel.push('update', data);
     });
   },
 
   findRecord(store, type, id, snapshot) {
-    const phoenix = get(this, 'phoenix');
+    let phoenix = get(this, 'phoenix');
+    let channelName = pluralize(type.modelName);
 
-    return phoenix.channel('contacts:index').then((channel) => {
+    return phoenix.channel(`${channelName}:index`).then((channel) => {
       return channel.push('find', id);
     });
   },
@@ -51,8 +54,9 @@ export default DS.Adapter.extend({
     const adapter = this;
     var serializer = store.serializerFor(type.modelName);
     const phoenix = get(this, 'phoenix');
+    let channelName = pluralize(type.modelName);
 
-    return phoenix.channel('contacts:index').then((channel) => {
+    return phoenix.channel(`${channelName}:index`).then((channel) => {
       return channel.push('all');
     });
   }
