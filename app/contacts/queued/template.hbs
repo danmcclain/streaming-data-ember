@@ -1,0 +1,12 @@
+<h1>Contacts</h1>
+
+{{#if queue.queues.contacts.length}}
+  {{queue.queues.contacts.length}} new contacts
+  <button onclick={{action "flushQueue"}}>Load!</button>
+{{/if}}
+
+{{#each model as |contact|}}
+  <div>
+    {{link-to contact.firstName 'contacts.show' contact.id}}
+  </div>
+{{/each}}
