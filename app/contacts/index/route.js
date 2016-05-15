@@ -6,6 +6,6 @@ const {
 
 export default Route.extend({
   model() {
-    return this.store.findAll('contact', { scope: 'global', subscribeTo: ['new', 'update'] });
+    return this.store.findAll('contact', { scope: 'global', subscribeTo: ['new', 'update', 'delete'] });
   }
 })
